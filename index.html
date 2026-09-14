@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الخِزانة — مكتبتك للقراءة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<!--
+  ===== خطوات تفعيل الإعلانات الحقيقية (AdSense) =====
+  1. سجّل حساب مجاني على https://adsense.google.com بنفس رابط GitHub Pages الخاص بك.
+  2. بعد الموافقة (قد تأخذ أياماً)، ستعطيك Google كود مثل:
+     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+  3. الصق هذا السطر هنا تحت وشغّل السطر التالي بعد استبدال ca-pub-XXXXXXXXXXXXXXX برقمك الحقيقي.
+  4. ابحث في الملف عن العنصر id="adSlot" وستجد مكانه الجاهز داخل نافذة الإعلان.
+-->
+<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+<style>
+  :root{
+    --ink:#1B2430;
+    --ink-2:#242F3E;
+    --parchment:#EFE6D2;
+    --paper:#FBF6EA;
+    --gold:#B08D57;
+    --gold-light:#D8BD8A;
+    --rust:#8B4A3B;
+    --rust-dark:#6E3A2E;
+    --text:#2B241C;
+    --text-soft:#5C5346;
+    --line: rgba(43,36,28,0.14);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--parchment);
+    color:var(--text);
+    font-family:'Tajawal', sans-serif;
+    min-height:100vh;
+  }
+  .app{ max-width:1000px; margin:0 auto; padding:0 20px 60px; }
+
+  /* ===== Header ===== */
+  header.top{
+    background: linear-gradient(180deg, var(--ink) 0%, var(--ink-2) 100%);
+    color:var(--parchment);
+    padding:28px 20px 34px;
+    margin:0 -20px 28px;
+    border-bottom: 3px solid var(--gold);
+  }
+  .top-inner{ max-width:1000px; margin:0 auto; display:flex; flex-direction:column; gap:14px; }
+  .brand{ display:flex; align-items:baseline; gap:12px; }
+  .brand h1{
+    font-family:'Amiri', serif;
+    font-size:34px;
+    margin:0;
+    font-weight:700;
+    color:var(--gold-light);
+  }
+  .brand span{ font-size:13px; color: rgba(239,230,210,0.65); }
+  .search-row{ display:flex; gap:10px; }
+  .search-row input{
+    flex:1;
+    background: rgba(239,230,210,0.08);
+    border:1px solid rgba(239,230,210,0.25);
+    color:var(--parchment);
+    padding:11px 16px;
+    border-radius:8px;
+    font-family:'Tajawal';
+    font-size:15px;
+    outline:none;
+  }
+  .search-row input::placeholder{ color: rgba(239,230,210,0.45); }
+  .search-row input:focus{ border-color: var(--gold); }
+
+  .filters{ display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; }
+  .filter-chip{
+    background:transparent;
+    border:1px solid rgba(239,230,210,0.3);
+    color: rgba(239,230,210,0.85);
+    padding:6px 14px;
+    border-radius:999px;
+    font-size:13px;
+    cursor:pointer;
+    font-family:'Tajawal';
+    transition: all .15s ease;
+  }
+  .filter-chip.active{ background:var(--gold); border-color:var(--gold); color:var(--ink); font-weight:700; }
+
+  /* ===== Grid ===== */
+  .section-label{
+    font-family:'Amiri', serif;
+    font-size:22px;
+    margin: 30px 2px 16px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .section-label::after{ content:""; flex:1; height:1px; background:var(--line); }
+
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px,1fr));
+    gap:20px;
+  }
+  .card{
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .cover{
+    aspect-ratio: 3/4.3;
+    border-radius:4px;
+    position:relative;
+    display:flex;
+    align-items:flex-end;
+    padding:14px 12px;
+    box-shadow: 0 6px 16px rgba(27,36,48,0.22), inset 0 0 0 1px rgba(0,0,0,0.08);
+    transition: transform .18s ease, box-shadow .18s ease;
+    overflow:hidden;
+  }
+  .card:hover .cover{ transform: translateY(-4px); box-shadow: 0 12px 22px rgba(27,36,48,0.3); }
+  .cover::before{
+    content:"";
+    position:absolute; inset:0;
+    background: repeating-linear-gradient(115deg, rgba(255,255,255,0.05) 0 2px, transparent 2px 6px);
+  }
+  .cover .spine{ position:absolute; right:0; top:0; bottom:0; width:8px; background: rgba(0,0,0,0.18); }
+  .cover-title{
+    font-family:'Amiri', serif;
+    font-weight:700;
+    font-size:16px;
+    line-height:1.35;
+    color: var(--paper);
+    position:relative;
+    z-index:1;
+  }
+  .lock-badge{
+    position:absolute; top:10px; left:10px;
+    background: rgba(27,36,48,0.55);
+    color: var(--gold-light);
+    border-radius:6px;
+    width:26px; height:26px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px;
+    z-index:2;
+  }
+  .card-meta{ padding:0 2px; }
+  .card-meta .t{ font-weight:700; font-size:14.5px; color:var(--text); }
+  .card-meta .a{ font-size:12.5px; color:var(--text-soft); margin-top:2px; }
+  .progress-bar{ height:3px; background:var(--line); border-radius:3px; margin-top:6px; overflow:hidden; }
+  .progress-bar i{ display:block; height:100%; background:var(--rust); }
+
+  /* ===== Detail overlay ===== */
+  .overlay{
+    position:fixed; inset:0; background: rgba(20,16,10,0.55);
+    display:none; align-items:flex-start; justify-content:center;
+    padding: 30px 16px; overflow-y:auto; z-index:50;
+  }
+  .overlay.open{ display:flex; }
+  .sheet{
+    background: var(--paper);
+    max-width:640px; width:100%;
+    border-radius:14px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    overflow:hidden;
+    animation: rise .22s ease;
+  }
+  @keyframes rise{ from{ transform:translateY(14px); opacity:0;} to{transform:translateY(0); opacity:1;} }
+  .sheet-head{
+    background: linear-gradient(135deg, var(--rust) 0%, var(--rust-dark) 100%);
+    color: var(--paper);
+    padding:24px 26px;
+    display:flex;
+    gap:16px;
+    align-items:flex-start;
+  }
+  .sheet-head .mini-cover{
+    width:70px; min-width:70px; aspect-ratio:3/4.3; border-radius:4px;
+    display:flex; align-items:flex-end; padding:8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  }
+  .sheet-head .mini-cover span{ font-family:'Amiri'; font-size:11px; font-weight:700; color:var(--paper); }
+  .sheet-head h2{ font-family:'Amiri', serif; margin:0 0 4px; font-size:22px; }
+  .sheet-head .author{ font-size:13px; opacity:0.85; }
+  .sheet-head .tag{ display:inline-block; margin-top:8px; font-size:11px; background:rgba(255,255,255,0.15); padding:3px 10px; border-radius:999px; }
+  .close-btn{
+    margin-right:auto; background:rgba(255,255,255,0.12); border:none; color:var(--paper);
+    width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:16px; line-height:1;
+  }
+  .sheet-body{ padding:24px 26px 28px; }
+  .sheet-body p.desc{ font-size:15px; line-height:1.9; color:var(--text); margin:0 0 20px; }
+  .chapters-list{ display:flex; flex-direction:column; gap:8px; margin-bottom:22px; }
+  .chapters-list .ch{ display:flex; justify-content:space-between; padding:9px 4px; border-bottom:1px dashed var(--line); font-size:14px; color:var(--text-soft); }
+
+  .primary-btn{
+    width:100%; padding:14px; border:none; border-radius:9px;
+    background: var(--rust); color:var(--paper); font-family:'Tajawal'; font-weight:700; font-size:15.5px;
+    cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;
+    transition: background .15s;
+  }
+  .primary-btn:hover{ background:var(--rust-dark); }
+  .secondary-note{ text-align:center; font-size:12.5px; color:var(--text-soft); margin-top:10px; }
+
+  /* ===== Ad modal ===== */
+  .ad-modal{
+    position:fixed; inset:0; background:rgba(10,8,6,0.85); z-index:80;
+    display:none; align-items:center; justify-content:center; padding:20px;
+  }
+  .ad-modal.open{ display:flex; }
+  .ad-box{
+    background: var(--ink); color:var(--parchment); width:100%; max-width:420px;
+    border-radius:14px; padding:30px 26px; text-align:center; border:1px solid var(--gold);
+  }
+  .ad-box .ad-label{ font-size:11px; letter-spacing:1px; color:var(--gold-light); margin-bottom:10px; }
+  .ad-ring{
+    width:88px; height:88px; margin:14px auto 18px; border-radius:50%;
+    border:5px solid rgba(239,230,210,0.15); border-top-color:var(--gold);
+    animation: spin 1s linear infinite;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Tajawal'; font-weight:700; font-size:22px;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg);} }
+  .ad-box h3{ font-family:'Amiri'; font-size:19px; margin:0 0 8px; }
+  .ad-box p{ font-size:13.5px; color:rgba(239,230,210,0.7); margin:0; }
+
+  /* ===== Reader ===== */
+  .reader{
+    position:fixed; inset:0; background: var(--paper); z-index:60;
+    display:none; flex-direction:column;
+  }
+  .reader.open{ display:flex; }
+  .reader-top{
+    display:flex; align-items:center; gap:12px; padding:14px 18px;
+    background: var(--ink); color:var(--parchment); border-bottom:2px solid var(--gold);
+  }
+  .reader-top .rt-title{ font-family:'Amiri'; font-size:15px; flex:1; text-align:center; }
+  .icon-btn{
+    background:none; border:none; color:var(--parchment); font-size:18px; cursor:pointer;
+    width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:6px;
+  }
+  .icon-btn:hover{ background: rgba(239,230,210,0.1); }
+  .reader-body{
+    flex:1; overflow-y:auto; padding: 36px 20px 80px;
+  }
+  .reader-inner{ max-width:620px; margin:0 auto; }
+  .reader-inner h3{ font-family:'Amiri'; font-size:22px; margin-bottom:18px; color:var(--rust-dark); }
+  .reader-inner p{
+    font-family:'Amiri', serif; font-size:19px; line-height:2.05; color:var(--text); margin:0 0 20px;
+    text-align:justify;
+  }
+  .reader-controls{
+    position:fixed; bottom:0; right:0; left:0; background: var(--ink);
+    border-top:1px solid rgba(239,230,210,0.15);
+    display:flex; align-items:center; justify-content:center; gap:18px; padding:12px;
+  }
+  .reader-controls button{
+    background: rgba(239,230,210,0.08); border:1px solid rgba(239,230,210,0.2); color:var(--parchment);
+    padding:8px 16px; border-radius:7px; font-family:'Tajawal'; font-size:13.5px; cursor:pointer;
+  }
+  .reader-controls button:disabled{ opacity:0.35; cursor:default; }
+
+  .empty{ text-align:center; padding:50px 10px; color:var(--text-soft); font-size:14px; }
+
+  /* ===== Support banner ===== */
+  .support-banner{
+    margin-top:40px;
+    background: var(--paper);
+    border:1px dashed var(--gold);
+    border-radius:12px;
+    padding:20px;
+    text-align:center;
+  }
+  .support-banner p{ margin:0 0 12px; font-size:13.5px; color:var(--text-soft); }
+  .support-link{
+    display:inline-block;
+    background: var(--gold);
+    color:var(--ink);
+    text-decoration:none;
+    font-weight:700;
+    font-size:14px;
+    padding:10px 22px;
+    border-radius:8px;
+  }
+
+  /* ===== Real ad slot (placeholder until AdSense is connected) ===== */
+  .ad-slot{
+    margin: 16px 0 4px;
+    min-height: 90px;
+    border:1px dashed rgba(239,230,210,0.3);
+    border-radius:8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color: rgba(239,230,210,0.4);
+    font-size:12px;
+  }
+
+  @media (max-width:480px){
+    .brand h1{ font-size:27px; }
+    .reader-inner p{ font-size:17.5px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="top">
+    <div class="top-inner">
+      <div class="brand">
+        <h1>الخِزانة</h1>
+        <span>مكتبتك الصغيرة، فصل بفصل</span>
+      </div>
+      <div class="search-row">
+        <input id="searchInput" type="text" placeholder="ابحث عن كتاب أو مؤلف…">
+      </div>
+      <div class="filters" id="filters"></div>
+    </div>
+  </header>
+
+  <div class="section-label" id="gridLabel">كل الكتب</div>
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="emptyMsg" style="display:none;">لا توجد نتائج مطابقة لبحثك</div>
+
+  <div class="support-banner">
+    <p>هل استمتعت بالمكتبة؟ يمكنك دعم استمرارها</p>
+    <!-- بدّل الرابط التالي برابط صفحتك الحقيقية على Buy Me a Coffee أو Ko-fi -->
+    <a class="support-link" href="https://buymeacoffee.com/your-username" target="_blank" rel="noopener">ادعم المشروع ☕</a>
+  </div>
+</div>
+
+<!-- Detail overlay -->
+<div class="overlay" id="overlay">
+  <div class="sheet" id="sheet"></div>
+</div>
+
+<!-- Ad modal -->
+<div class="ad-modal" id="adModal">
+  <div class="ad-box">
+    <div class="ad-label">إعلان تجريبي</div>
+    <div class="ad-ring" id="adRing">5</div>
+    <h3 id="adHeading">جارٍ عرض الإعلان الأول</h3>
+    <p>سيُفتح الكتاب بعد مشاهدة إعلانين قصيرين</p>
+    <!-- بعد ربط AdSense، ضع هنا وحدة إعلانية حقيقية بدل هذا المربع الفارغ -->
+    <div class="ad-slot" id="adSlot">مكان الإعلان الحقيقي (يظهر بعد ربط AdSense)</div>
+  </div>
+</div>
+
+<!-- Reader -->
+<div class="reader" id="reader">
+  <div class="reader-top">
+    <button class="icon-btn" id="readerBack">→</button>
+    <div class="rt-title" id="readerTitle"></div>
+    <button class="icon-btn" id="fontMinus">أ-</button>
+    <button class="icon-btn" id="fontPlus">أ+</button>
+  </div>
+  <div class="reader-body" id="readerBody">
+    <div class="reader-inner" id="readerInner"></div>
+  </div>
+  <div class="reader-controls">
+    <button id="prevCh">الفصل السابق</button>
+    <span id="chLabel" style="color:var(--parchment); font-size:13px;"></span>
+    <button id="nextCh">الفصل التالي</button>
+  </div>
+</div>
+
+<script>
+/* ============ DATA ============
+   محتوى أصلي بأسلوب الحكاية والمقامة التراثية، من تأليف خاص بهذا التطبيق —
+   وليس نسخاً عن أي كتاب أو رواية محمية بحقوق نشر.
+   يمكن لاحقاً استبدال/إضافة كتب حقيقية بإدخال نصوصها هنا بنفس الصيغة.
+*/
+const BOOKS = [
+  {
+    id:"b1", title:"حكاية التاجر والمدينة الضائعة", author:"من تأليف الخِزانة",
+    category:"مغامرات", color1:"#8B4A3B", color2:"#5C2E23",
+    desc:"تاجرٌ يترك دياره بحثاً عن مدينة ذكرها جدّه في وصيته الأخيرة، فيعبر صحارى وموانئ، ويتعلّم أنّ أعظم الكنوز ليست دوماً ذهباً.",
+    chapters:[
+      {title:"الوصية", text:["قبل أن يموت الجدّ عبد الوهاب، استدعى حفيده يونس إلى فراشه، وأخرج من تحت وسادته خريطة باهتة الحبر. قال بصوتٍ يتهدّج: «هذه المدينة ليست على أيّ خارطة تجدها في الأسواق يا بنيّ، وجدتها مرّة واحدة في حياتي، ثمّ أضعت الطريق إليها إلى الأبد. اذهب أنت، فلعلّ القدر يرحمك كما لم يرحمني».", "لم يفهم يونس، في تلك الليلة، أنّ جملة عابرة كهذه ستغيّر مجرى حياته كلّها. طوى الخريطة، ووضعها في صدره، وواصل سهره إلى جانب جدّه حتى فاضت روحه عند الفجر.", "مرّت أربعون يوماً على العزاء قبل أن يقرّر يونس بيع دكّانه الصغير للأقمشة، ويشتري بثمنه جملاً وقربتين من الماء ومؤونة تكفي لشهرٍ، ويمضي شرقاً كما أشارت الخريطة."]},
+      {title:"عاصفة في الرمال", text:["في اليوم الثاني عشر من رحلته، اسودّت السماء فجأة كأنّ الليل انقضّ على النهار قبل أوانه. عرف يونس، ممّا سمعه من التجّار العابرين، أنّ هذه علامة عاصفةٍ رمليةٍ قادمة، فأنزل جمله خلف كثيبٍ عالٍ، وربط عينيه بقماشةٍ مبلّلة، وانتظر.", "دامت العاصفة ساعتين لم يشعر فيهما بمرور الوقت، بل بثقل الرمل على كتفيه وبخوفٍ لم يعرفه من قبل. حين هدأت الريح أخيراً، وجد نفسه قد انزاح عن الطريق الذي رسمه جدّه بأميال، وفقد القربة الثانية بين الرمال.", "لم يبكِ يونس، لكنّه جلس على الأرض طويلاً يتأمّل الخريطة التي كادت تتمزّق، ويسأل نفسه إن كانت هذه بداية الحكمة التي حاول جدّه أن يورّثه إياها، أم مجرّد نذير بالفشل."]},
+      {title:"المدينة التي لا تُرى نهاراً", text:["دلّه راعٍ عجوز، بعد أيامٍ من التيه، على واحةٍ صغيرةٍ يقول أهل تلك الأصقاع إنّ مدينةً غريبةً تظهر عندها كلّ ليلةٍ ثم تختفي مع أول خيوط الفجر. ضحك يونس من الحكاية، لكنّه بات هناك على أيّ حال، لأنّه لم يعد يملك خياراً آخر.", "عند منتصف الليل، بدأت الرمال تلمع بضوءٍ أزرق خافت، وتصاعدت من تحتها أسوارٌ وقبابٌ وأبراج، كأنّ المدينة كانت نائمةً تحت الأرض تنتظر من يوقظها. دخلها يونس مرتجفاً، فوجد أسواقها مليئة بأناسٍ لا يتكلّمون، يبيعون ويشترون بالإشارة وحدها.", "وهناك أدرك يونس أنّ الكنز الذي طلبه جدّه لم يكن ذهباً مدفوناً، بل هذه اللحظة بعينها: أن يقف إنسانٌ عند حافة العالم الذي يعرفه، ويرى أنّ خلفه عوالم أخرى لا تُحصى. عاد يونس إلى دياره بعد أشهر، لا يحمل كنزاً، لكنّه لم يعد التاجر نفسه الذي غادر."]}
+    ]
+  },
+  {
+    id:"b2", title:"رسائل من نافذة صغيرة", author:"من تأليف الخِزانة",
+    category:"وجدانيات", color1:"#4A5A6E", color2:"#28323F",
+    desc:"يوميات فتاةٍ تراقب حيّها من نافذة غرفتها طوال عامٍ كامل، وتكتب عمّا تراه من تحوّلاتٍ صغيرة تشبه تحوّلات نفسها.",
+    chapters:[
+      {title:"كانون الأول", text:["نافذتي تطلّ على شارعٍ ضيّق، لا يمرّ منه إلا بائع الكستناء وقطّةٌ رماديةٌ اعتادت الجلوس على السور المقابل عند الرابعة عصراً بالضبط، وكأنّ لديها موعداً لا تخلّ به أبداً.", "اليوم لاحظت أنّ صاحب المتجر القديم في الزاوية غيّر يافطته. كانت زرقاء باهتة منذ أن أعرف هذا الشارع، وأصبحت الآن حمراء لامعة. لا أعرف لماذا أحسست بشيءٍ من الحزن، كأنّ جزءاً من ذاكرتي مُحي دون استئذاني."]},
+      {title:"شباط", text:["الشتاء هذا العام طويل. أكتب هذه السطور والمطر يرسم خطوطاً مائلة على الزجاج، والقطّة الرمادية غائبة منذ ثلاثة أيام. بدأت أفكّر فيها أكثر ممّا أفكّر في أيّ شيءٍ آخر هذا الأسبوع، وهذا غريب، لأنني لم أقترب منها يوماً ولم ألمسها قط.", "ربما هذا هو معنى الأُلفة: أن نتعلّق بأشياء لا نملكها ولا نسيطر عليها، فقط لأنها كانت هناك، في المكان نفسه، في الوقت نفسه، كل يوم."]},
+      {title:"نيسان", text:["عادت القطّة اليوم، تجرّ خلفها ثلاثة صغار. جلست على السور نفسه، في الساعة نفسها، وكأن الأشهر الثلاثة لم تكن غياباً بل استعداداً لشيءٍ أكبر.", "أدركت وأنا أراقبها أن النافذة التي ظننتها تحصرني في مكانٍ واحد، كانت في الحقيقة تعلّمني كيف أرى التغيير وهو يحدث ببطء، دون أن أركض خلفه. ربما لست بحاجة إلى الخروج من الغرفة لأكبر، بل فقط إلى أن أنتبه."]}
+    ]
+  },
+  {
+    id:"b3", title:"سيرة نجّار الظلّ", author:"من تأليف الخِزانة",
+    category:"رمزية", color1:"#6E5A2E", color2:"#463A1D",
+    desc:"في قريةٍ يُقال إنّ لكل إنسانٍ فيها نجّاراً خفياً يصنع له ظلّه، يروي هذا الكتاب حكاية نجّارٍ يرفض أن يصنع ظلاً لرجلٍ ظالم.",
+    chapters:[
+      {title:"صنعة لا يعرفها أحد", text:["يقول كبار القرية إنّ لكلّ مولودٍ ظلاً يُصنع له في الليلة السابعة من عمره، بيد نجّارٍ لا يراه أحد، يعمل في ورشة لا بابَ لها. لا يُسأل النجّار عن أجرٍ، ولا يُعرف اسمه، لكنّ القرية تنعم بالسلام طالما بقي يصنع الظلال بإنصاف.", "حين وُلد الطفل الذي سيُدعى فيما بعد الحاكم القاسي، وقف النجّار أمام قطعة الخشب المخصصة لظلّه، ولم يحرّك يده. مرّت الليلة السابعة دون أن يُصنع له ظلّ، فنما الطفل بلا ظلّ يتبعه، وهذا، في تلك القرية، أعظم لعنةٍ يمكن أن تصيب إنساناً."]},
+      {title:"رجلٌ بلا ظلّ", text:["كبر الطفل ليصبح رجلاً قوياً لا يخاف الشمس لأنها لا تكشف عنه شيئاً، فلا ظلّ يتبعه ليذكّره بحدود جسده، ولا يسبقه ليحذّره من عثرةٍ أمامه. ظنّ الناس أن غياب الظلّ نعمةٌ تمنحه قوةً خارقة، فبايعوه حاكماً عليهم.", "لكنه، مع الأيام، بدأ يتصرّف كمن لا يُرى: يأخذ ما ليس له، ويكسر ما لا يحقّ له كسره، لأنّه، في عمقه، شعر أنّه غير موجودٍ حقّاً، وأن لا شيء يربطه بالأرض التي يمشي عليها."]},
+      {title:"العودة إلى الورشة", text:["حين اشتكت القرية من ظلمه، عاد النجّار الخفي إلى ورشته بعد سنين من الصمت، وأمسك قطعة الخشب ذاتها التي تركها فارغة. قال لنفسه: «حرمانه من الظلّ لم يعلّمه شيئاً، بل جعله يظنّ أنه فوق كل قانون».", "فنحت له ظلاً، لكن ظلاً مثقلاً، يتحرّك ببطء، ويكبر كلما اقترب الحاكم من غروب الشمس، وكأنّه يذكّره في كل مساءٍ بأن لكل فعلٍ أثراً يتبعه ولو طال الزمن. يُقال إن الحاكم، حين رأى ظلّه لأول مرة يتمدّد أمامه عند الغروب، جلس على الأرض وبكى، ومن يومها بدأ يحكم بعدل."]}
+    ]
+  },
+  {
+    id:"b4", title:"مقامة الحدّاد الفقيه", author:"من تأليف الخِزانة",
+    category:"مقامات", color1:"#3E4A3A", color2:"#252E22",
+    desc:"على طريقة المقامات القديمة، يروي راوٍ متجوّل حكاية حدّادٍ بسيط هزم فقيهاً مشهوراً في مناظرةٍ بالحكمة لا بالعلم.",
+    chapters:[
+      {title:"دخول السوق", text:["حدّثنا الراوي قال: دخلتُ سوق النحاسين في يومٍ صائفٍ يلهب الحصى، فرأيت حلقةً من الناس قد اجتمعت حول دكّان حدّادٍ أسمر اليدين، وفقيهٍ معمّمٍ يخطب فيهم بصوتٍ جهوريٍّ عن فضل العلم على العمل.", "قال الفقيه: «من قضى عمره في طرق الحديد كمن قضاه في طرق الجهل، فالعلم أشرف من كل صنعة». فابتسم الحدّاد ولم يرفع رأسه عن سندانه، واستمرّ يطرق بمطرقته على قطعة الحديد المحمّاة."]},
+      {title:"سؤالٌ من نار", text:["توقّف الحدّاد فجأة، ورفع القطعة المحمّاة بملقطه وقال للفقيه: «يا سيدي الفاضل، أخبرني بعلمك: لو تركتُ هذا الحديد يبرد الآن دون أن أطرقه، أيعود كما كان أم يفسد شكله إلى الأبد؟»", "تلعثم الفقيه، فلم يكن قد أمسك مطرقةً في حياته. فقال الحدّاد: «هذا ما تعلّمته من عملي: أن كل شيءٍ له لحظةٌ لا تنتظر، يُصاغ فيها وإلا فسد. أظنّ العلم كذلك، إن لم يُطرق بعملٍ صالحٍ في وقته، يبرد ويفسد شكله».", "ضجّت الحلقة بالضحك المستحسن، وأدرك الفقيه أنّ خصمه لم يكن جاهلاً كما ظنّ، بل رجلاً وجد في نار دكّانه حكمةً لا توجد في كل كتاب."]}
+    ]
+  },
+  {
+    id:"b5", title:"ظلال في البيت القديم", author:"من تأليف الخِزانة",
+    category:"غموض", color1:"#5C2E4A", color2:"#391C2E",
+    desc:"ثلاثة إخوةٍ يعودون إلى بيت جدّهم بعد سنين ليكتشفوا أن غرفةً واحدة فيه ظلّت مقفلة طوال حياتهم، ولكل واحدٍ منهم سببٌ لفتحها.",
+    chapters:[
+      {title:"المفتاح الوحيد", text:["لم يكن في وصية الجدّ إبراهيم سوى جملةٍ واحدة: «المفتاح في درج المكتب، والغرفة الشرقية أمانة، لا تُفتح إلا وأنتم الثلاثة معاً». اجتمع الإخوة الثلاثة، سلمى وكريم وماهر، في صالة البيت المهجور بعد غيابٍ دام عشر سنوات.", "قالت سلمى: «لطالما ظننت أن تلك الغرفة مجرد مخزن قديم». لكن نظرة كريم الطويلة إلى الباب الخشبي المتشقق أوحت بأنه يعرف أكثر مما يقول."]},
+      {title:"ما وراء الباب", text:["حين أدير المفتاح أخيراً، لم تكن الغرفة مخزناً، بل مكتبةً صغيرةً مرتّبة بعناية، وعلى الجدار لوحاتٌ لثلاثة أطفالٍ لم يتعرّف عليهم أحد. تجمّد ماهر أمام إحدى اللوحات وقال بصوتٍ مختنق: «هذه أمي... حين كانت صغيرة».", "عرفوا حينها أن جدّهم كان يخفي حكايةً عن عائلةٍ أخرى، أختٍ لأمهم لم يسمعوا بها قط، ابتعدت عن البيت في ظروفٍ غامضة قبل أن يُولد أيٌّ منهم."]},
+      {title:"الرسالة الأخيرة", text:["في أسفل أحد الأدراج، وجدوا رسالةً بخط الجدّ، يعتذر فيها عن صمتٍ طويل، ويشرح خلافاً عائلياً قديماً منعه من ذكر اسم ابنته الكبرى أمام أحد. طلب منهم أن يبحثوا عنها، وأن يخبروها أنه ظلّ يفكّر فيها كل يوم حتى وفاته.", "خرج الإخوة الثلاثة من الغرفة الشرقية بصمتٍ مختلفٍ عن الذي دخلوا به، يحملون عنواناً قديماً على ظرفٍ مصفرّ، وسؤالاً واحداً: هل ما زال الوقت كافياً لإصلاح ما تأخّر جدّهم عن إصلاحه؟"]}
+    ]
+  },
+  {
+    id:"b6", title:"ديوان الصبّار", author:"من تأليف الخِزانة",
+    category:"شعر", color1:"#2E4A44", color2:"#1B2E29",
+    desc:"مجموعة نصوصٍ شعرية قصيرة عن الصبر والانتظار والأرض، مستوحاة من صورة الصبّار الذي يزهر رغم الجفاف.",
+    chapters:[
+      {title:"القسم الأول: جذور", text:["لا تسل الجذر لماذا طال بحثه عن الماء،\nفهو لم يختر الأرض القاسية،\nلكنه اختار ألا يستسلم لها.", "من علّم الصبّار أن يخزّن الصبر في جسده؟\nربما الجفاف نفسه،\nحين لم يترك له خياراً سوى أن يتعلّم."]},
+      {title:"القسم الثاني: أزهار متأخرة", text:["تزهر بعض النباتات في أول الربيع،\nوبعضها ينتظر حتى يظنّ الجميع أنها ماتت،\nثم تُخرج زهرةً واحدة، كافية لتغيير الحكاية.", "لا تقارن توقيتك بتوقيت غيرك،\nفبعض الجذور تحتاج سنواتٍ في الظلام،\nقبل أن تعرف أين تتّجه نحو النور."]}
+    ]
+  }
+];
+
+const CATEGORIES = ["الكل", ...Array.from(new Set(BOOKS.map(b=>b.category)))];
+
+/* ============ STATE ============ */
+let unlocked = {};      // {bookId: true}
+let progress = {};      // {bookId: {chapter: n}}
+let currentBook = null;
+let currentChapter = 0;
+let fontSize = 19;
+let activeCategory = "الكل";
+let searchTerm = "";
+let pendingAdStage = 0; // 0 none, 1 first ad running, 2 second ad running
+
+/* ============ STORAGE ============ */
+async function loadState(){
+  try{
+    const u = await window.storage.get('unlocked-books');
+    unlocked = u ? JSON.parse(u.value) : {};
+  }catch(e){ unlocked = {}; }
+  try{
+    const p = await window.storage.get('reading-progress');
+    progress = p ? JSON.parse(p.value) : {};
+  }catch(e){ progress = {}; }
+}
+async function saveUnlocked(){
+  try{ await window.storage.set('unlocked-books', JSON.stringify(unlocked)); }catch(e){}
+}
+async function saveProgress(){
+  try{ await window.storage.set('reading-progress', JSON.stringify(progress)); }catch(e){}
+}
+
+/* ============ RENDER: FILTERS ============ */
+function renderFilters(){
+  const el = document.getElementById('filters');
+  el.innerHTML = "";
+  CATEGORIES.forEach(cat=>{
+    const b = document.createElement('button');
+    b.className = 'filter-chip' + (cat===activeCategory ? ' active':'');
+    b.textContent = cat;
+    b.onclick = ()=>{ activeCategory = cat; renderFilters(); renderGrid(); };
+    el.appendChild(b);
+  });
+}
+
+/* ============ RENDER: GRID ============ */
+function renderGrid(){
+  const grid = document.getElementById('grid');
+  const empty = document.getElementById('emptyMsg');
+  grid.innerHTML = "";
+  let list = BOOKS.filter(b=>{
+    const matchCat = activeCategory==="الكل" || b.category===activeCategory;
+    const matchSearch = !searchTerm || b.title.includes(searchTerm) || b.author.includes(searchTerm);
+    return matchCat && matchSearch;
+  });
+  empty.style.display = list.length ? 'none':'block';
+  list.forEach(b=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    const isLocked = !unlocked[b.id];
+    const prog = progress[b.id];
+    const pct = prog ? Math.round(((prog.chapter+1)/b.chapters.length)*100) : 0;
+    card.innerHTML = `
+      <div class="cover" style="background:linear-gradient(155deg, ${b.color1}, ${b.color2});">
+        ${isLocked ? '<div class="lock-badge">🔒</div>' : ''}
+        <div class="spine"></div>
+        <div class="cover-title">${b.title}</div>
+      </div>
+      <div class="card-meta">
+        <div class="t">${b.title}</div>
+        <div class="a">${b.author} · ${b.category}</div>
+        ${pct>0 ? `<div class="progress-bar"><i style="width:${pct}%"></i></div>` : ''}
+      </div>
+    `;
+    card.onclick = ()=> openDetail(b);
+    grid.appendChild(card);
+  });
+}
+
+/* ============ DETAIL SHEET ============ */
+function openDetail(book){
+  currentBook = book;
+  const sheet = document.getElementById('sheet');
+  const isLocked = !unlocked[book.id];
+  const prog = progress[book.id];
+  sheet.innerHTML = `
+    <div class="sheet-head" style="background:linear-gradient(135deg, ${book.color1}, ${book.color2});">
+      <div class="mini-cover" style="background:linear-gradient(155deg, ${book.color1}, ${book.color2});"><span>${book.title}</span></div>
+      <div style="flex:1;">
+        <button class="close-btn" id="closeSheet" style="float:left;">✕</button>
+        <h2>${book.title}</h2>
+        <div class="author">${book.author}</div>
+        <div class="tag">${book.category}</div>
+      </div>
+    </div>
+    <div class="sheet-body">
+      <p class="desc">${book.desc}</p>
+      <div class="chapters-list">
+        ${book.chapters.map((c,i)=>`<div class="ch"><span>${i+1}. ${c.title}</span><span>${isLocked?'🔒':'📖'}</span></div>`).join('')}
+      </div>
+      <button class="primary-btn" id="actionBtn">
+        ${isLocked ? '🔒 شاهد إعلانين لفتح الكتاب' : (prog ? '📖 متابعة القراءة' : '📖 ابدأ القراءة')}
+      </button>
+      <div class="secondary-note">${isLocked ? 'فتح مجاني — دعمك يأتي من مشاهدة إعلانين قصيرين فقط' : 'الكتاب مفتوح بالكامل لك'}</div>
+    </div>
+  `;
+  document.getElementById('closeSheet').onclick = closeDetail;
+  document.getElementById('actionBtn').onclick = ()=>{
+    if(isLocked){ startAdFlow(book); }
+    else{ closeDetail(); openReader(book, prog ? prog.chapter : 0); }
+  };
+  document.getElementById('overlay').classList.add('open');
+}
+function closeDetail(){ document.getElementById('overlay').classList.remove('open'); }
+
+/* ============ AD FLOW (simulated) ============ */
+function startAdFlow(book){
+  pendingAdStage = 1;
+  runAdCountdown(1, book);
+}
+function runAdCountdown(stage, book){
+  const modal = document.getElementById('adModal');
+  const ring = document.getElementById('adRing');
+  const heading = document.getElementById('adHeading');
+  heading.textContent = stage===1 ? "جارٍ عرض الإعلان الأول" : "جارٍ عرض الإعلان الثاني";
+  modal.classList.add('open');
+  let n = 4;
+  ring.textContent = n;
+  const timer = setInterval(()=>{
+    n--;
+    if(n<=0){
+      clearInterval(timer);
+      modal.classList.remove('open');
+      if(stage===1){
+        setTimeout(()=>runAdCountdown(2, book), 350);
+      }else{
+        unlockBook(book);
+      }
+    }else{
+      ring.textContent = n;
+    }
+  },1000);
+}
+async function unlockBook(book){
+  unlocked[book.id] = true;
+  await saveUnlocked();
+  renderGrid();
+  openDetail(book); // refresh sheet to show unlocked state
+}
+
+/* ============ READER ============ */
+function openReader(book, chapterIndex){
+  currentBook = book;
+  currentChapter = chapterIndex || 0;
+  document.getElementById('readerTitle').textContent = book.title;
+  renderChapter();
+  document.getElementById('reader').classList.add('open');
+}
+function renderChapter(){
+  const book = currentBook;
+  const ch = book.chapters[currentChapter];
+  const inner = document.getElementById('readerInner');
+  inner.style.fontSize = fontSize + 'px';
+  inner.innerHTML = `<h3>${ch.title}</h3>` + ch.text.map(p=>`<p style="font-size:${fontSize}px;">${p.replace(/\n/g,'<br>')}</p>`).join('');
+  document.getElementById('chLabel').textContent = `الفصل ${currentChapter+1} من ${book.chapters.length}`;
+  document.getElementById('prevCh').disabled = currentChapter===0;
+  document.getElementById('nextCh').disabled = currentChapter===book.chapters.length-1;
+  document.getElementById('readerBody').scrollTop = 0;
+  progress[book.id] = { chapter: currentChapter };
+  saveProgress();
+  renderGrid();
+}
+document.getElementById('readerBack').onclick = ()=>{
+  document.getElementById('reader').classList.remove('open');
+};
+document.getElementById('prevCh').onclick = ()=>{ if(currentChapter>0){ currentChapter--; renderChapter(); } };
+document.getElementById('nextCh').onclick = ()=>{ if(currentChapter<currentBook.chapters.length-1){ currentChapter++; renderChapter(); } };
+document.getElementById('fontPlus').onclick = ()=>{ fontSize = Math.min(fontSize+2, 28); renderChapter(); };
+document.getElementById('fontMinus').onclick = ()=>{ fontSize = Math.max(fontSize-2, 14); renderChapter(); };
+
+document.getElementById('searchInput').addEventListener('input', (e)=>{
+  searchTerm = e.target.value.trim();
+  renderGrid();
+});
+
+/* ============ INIT ============ */
+(async function init(){
+  await loadState();
+  renderFilters();
+  renderGrid();
+})();
+</script>
+</body>
+</html>
